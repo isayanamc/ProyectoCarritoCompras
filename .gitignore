@@ -1,0 +1,18 @@
+# Archivos de compilación y temporales
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+*.log
+*.db
+
+# Configuración de entorno
+.env
+appsettings.json
+appsettings.Development.json
+
+# Dependencias
+node_modules/
+packages/

@@ -1,10 +1,19 @@
 using DTO;
 using System;
 using DataAccess.DAOs;
+
 namespace DataAccess.CRUDs
 {
     public class UserCrudFactory : CrudFactory
     {
+
+        private readonly SqlDao _sqlDao;
+
+        public UserCrudFactory()
+        {
+            _sqlDao = SqlDao.GetInstance();
+        }
+
         public override void Create(BaseDTO dto)
         {
             // Convertir el DTO genérico a un objeto de tipo User
@@ -22,8 +31,35 @@ namespace DataAccess.CRUDs
             sqlOperation.AddDateTimeParam("P_BIRTH_DATE", user.BirthDate);
             sqlOperation.AddStringParameter("P_PASSWORD", user.Password);
 
-        }
             // Ir al DAO y ejecutar
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
+
+        public override T Retrieve<T>(BaseDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Delete(BaseDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override T RetrieveById<T>(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Update(BaseDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override List<T> RetrieveAll<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+
+    }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using DataAccess.DAOs;
 
 namespace DataAccess.DAOs
 {
@@ -33,54 +34,24 @@ namespace DataAccess.DAOs
         }
 
         // 🔹 5. Método para ejecutar procedimientos almacenados
-        public void ExecuteProcedure(SqlOperation sqlOperation)
-        {
-            try
-            {
-                using (var conn = new SqlConnection(_connectionString))
-                {
-                    conn.Open(); // 🔹 5.1 Abrir la conexión con la base de datos
-
-                    using (var command = new SqlCommand(sqlOperation.ProcedureName, conn))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        // 🔹 5.2 Agregar los parámetros al comando SQL
-                        foreach (var param in sqlOperation.Parameters)
-                        {
-                            command.Parameters.AddWithValue(param.Key, param.Value);
-                        }
-
-                        // 🔹 5.3 Ejecutar el procedimiento almacenado
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"⚠ Error ejecutando el procedimiento {sqlOperation.ProcedureName}: {ex.Message}");
-                throw;
-            }
-        }
-    }
-
-    /*
-     * Clase que representa una operación SQL con stored procedures.
-     */
-    public class SqlOperation
+    public void ExecuteProcedure(SqlOperation sqlOperation)
     {
-        public string ProcedureName { get; set; }
-        public Dictionary<string, object> Parameters { get; set; }
-
-        public SqlOperation(string procedureName)
+    using (var conn = new SqlConnection(_connectionString))
+    {
+        using (var command = new SqlCommand(sqlOperation.ProcedureName, conn))
         {
-            ProcedureName = procedureName;
-            Parameters = new Dictionary<string, object>();
-        }
+            command.CommandType = CommandType.StoredProcedure;
 
-        public void AddParameter(string key, object value)
-        {
-            Parameters.Add(key, value);
+            foreach (var param in sqlOperation.Parameters)
+            {
+                command.Parameters.Add(param);
+            }
+
+            conn.Open();
+            command.ExecuteNonQuery();
         }
     }
+    }
+
+}
 }

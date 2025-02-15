@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 
 namespace DataAccess.DAOs
 {
@@ -16,7 +16,7 @@ namespace DataAccess.DAOs
         public List<SqlParameter> Parameters { get; set; }
 
        
-        private readonly string _connectionString = "Server=localhost;Database=shopping-cart-db;User Id=sa;Password=SQLServer1234;TrustServerCertificate=True;";
+        //private readonly string _connectionString = "Server=localhost;Database=shopping-cart-db;User Id=sa;Password=SQLServer1234;TrustServerCertificate=True;";
 
         // Constructor sin parámetros que inicializa la lista de parámetros
         public SqlOperation()
@@ -31,7 +31,7 @@ namespace DataAccess.DAOs
         }
 
         // Método para agregar un parámetro de tipo int
-        public void AddIntParam(string paramName, int paramValue)
+        public void AddIntParameter(string paramName, int paramValue)
         {
             Parameters.Add(new SqlParameter(paramName, paramValue));
         }
@@ -48,25 +48,5 @@ namespace DataAccess.DAOs
             Parameters.Add(new SqlParameter(paramName, paramValue));
         }
 
-        public void ExecuteProcedure(SqlOperation sqlOperation)
-        {
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                using (var command = new SqlCommand(sqlOperation.ProcedureName, conn))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-
-                    // Asigna los parámetros
-                    foreach (var param in sqlOperation.Parameters)
-                    {
-                        command.Parameters.Add(param);
-                    }
-
-                    // Ejecuta el procedimiento almacenado
-                    conn.Open();
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
     }
 }

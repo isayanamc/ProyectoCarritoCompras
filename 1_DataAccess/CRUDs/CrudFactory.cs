@@ -2,17 +2,20 @@ using DataAccess.DAOs;
 using DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.CRUDs
 {
     // 🔹 Clase abstracta base para las operaciones CRUD
     public abstract class CrudFactory
     {
-        // 🔹 Instancia protegida de SqlDao para manejar las consultas a la base de datos
-        protected SqlDao _sqlDao;
+        // 🔹 Instancia de SqlDao protegida y accesible para las clases que hereden de CrudFactory
+        protected readonly SqlDao _sqlDao;
+
+        // 🔹 Constructor base que inicializa la instancia de SqlDao
+        protected CrudFactory()
+        {
+            _sqlDao = SqlDao.GetInstance();
+        }
 
         // 🔹 Métodos abstractos que cada CRUD específico debe implementar
         public abstract void Create(BaseDTO dto);  // C -> Create

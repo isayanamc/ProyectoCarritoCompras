@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace DataAccess.DAOs
 {
@@ -12,12 +12,10 @@ namespace DataAccess.DAOs
      */
     public class SqlOperation
     {
-        public string ProcedureName { get; set; }
+        public required string ProcedureName { get; set; } = null!;
         public List<SqlParameter> Parameters { get; set; }
 
        
-        //private readonly string _connectionString = "Server=localhost;Database=shopping-cart-db;User Id=sa;Password=SQLServer1234;TrustServerCertificate=True;";
-
         // Constructor sin parámetros que inicializa la lista de parámetros
         public SqlOperation()
         {

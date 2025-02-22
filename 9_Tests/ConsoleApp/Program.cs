@@ -1,6 +1,7 @@
 ﻿using DataAccess.CRUDs;
 using DTO;
 using System;
+using Newtonsoft.Json;  
 
 namespace ConsoleApp
 {
@@ -11,43 +12,27 @@ namespace ConsoleApp
             bool salir = false;
             while (!salir)
             {
-                Console.WriteLine("=================================");
+                Console.WriteLine("\n===============================");
                 Console.WriteLine("        🛒 Menú Principal 🛒        ");
-                Console.WriteLine("=================================");
+                Console.WriteLine("===============================");
                 Console.WriteLine(" 1. Crear Usuario");
                 Console.WriteLine(" 2. Actualizar Usuario");
-                Console.WriteLine(" 3. Crear Producto");
-                Console.WriteLine(" 4. Actualizar Producto");
+                Console.WriteLine(" 3. Listar Usuarios");
+                Console.WriteLine(" 4. Buscar Usuario por ID");
                 Console.WriteLine(" 5. Eliminar Usuario");
-                Console.WriteLine(" 6. Eliminar Producto");
-                Console.WriteLine(" 7. Salir");
-                Console.WriteLine("=================================");
+                Console.WriteLine(" 6. Salir");
+                Console.WriteLine("===============================");
                 Console.Write("Seleccione una opción: ");
 
                 string opcion = Console.ReadLine();
                 switch (opcion)
                 {
-                    case "1":
-                        CrearUsuario();
-                        break;
-                    case "2":
-                        ActualizarUsuario();
-                        break;
-                    case "3":
-                        CrearProducto();
-                        break;
-                    case "4":
-                        ActualizarProducto();
-                        break;
-                    case "5":
-                        EliminarUsuario();
-                        break;
-                    case "6":
-                        EliminarProducto();
-                        break;
-                    case "7":
-                        salir = true;
-                        break;
+                    case "1": CrearUsuario(); break;
+                    case "2": ActualizarUsuario(); break;   
+                    case "3": ListarUsuarios(); break;
+                    case "4": BuscarUsuarioPorID(); break;
+                    case "5": EliminarUsuario(); break;   
+                    case "6": salir = true; break;
                     default:
                         Console.WriteLine("❌ Opción inválida, intente nuevamente.");
                         break;
@@ -57,189 +42,112 @@ namespace ConsoleApp
 
         static void CrearUsuario()
         {
-            Console.WriteLine("\n=== Crear Usuario ===");
-            Console.Write("Código de usuario: ");
-            string userCode = Console.ReadLine();
+            var uCrud = new UserCrudFactory();
+            var user = new User();
 
-            Console.Write("Nombre: ");
-            string name = Console.ReadLine();
+            Console.WriteLine("\n=== Creación de usuario ===");
 
-            Console.Write("Apellido: ");
-            string lastName = Console.ReadLine();
+            Console.Write("📌 Digite el código de usuario: ");
+            user.UserCode = Console.ReadLine();
 
-            Console.Write("Email: ");
-            string email = Console.ReadLine();
+            Console.Write("📌 Digite el nombre: ");
+            user.Name = Console.ReadLine();
 
-            Console.Write("Teléfono: ");
-            string _phone = Console.ReadLine();
+            Console.Write("📌 Digite el apellido: ");
+            user.LastName = Console.ReadLine();
 
-            Console.Write("Fecha de nacimiento (yyyy-mm-dd): ");
-            DateTime birthdate = DateTime.Parse(Console.ReadLine());
+            Console.Write("📌 Digite el correo electrónico: ");
+            user.Email = Console.ReadLine();
 
-            Console.Write("Contraseña: ");
-            string password = Console.ReadLine();
+            Console.Write("📌 Digite el número de teléfono: ");
+            user.PhoneNumber = Console.ReadLine();
 
-            var user = new User()
+            Console.Write("📌 Digite la fecha de nacimiento (YYYY-MM-DD): ");
+            if (DateTime.TryParse(Console.ReadLine(), out DateTime birthDate))
             {
-                UserCode = userCode,
-                Name = name,
-                LastName = lastName,
-                Email = email,
-                PhoneNumber = _phone,
-                BirthDate = birthdate,
-                Password = password
-            };
+                user.BirthDate = birthDate;
+            }
+            else
+            {
+                Console.WriteLine("❌ Fecha inválida. Se asignará la fecha mínima.");
+                user.BirthDate = DateTime.MinValue;
+            }
 
-            var userCrud = new UserCrudFactory();
-            userCrud.Create(user);
+            Console.Write("📌 Digite la contraseña: ");
+            user.Password = Console.ReadLine();
+
+            // Llamada a la función para guardar el usuario
+            uCrud.Create(user);
 
             Console.WriteLine("✅ Usuario creado exitosamente.");
         }
 
+
         static void ActualizarUsuario()
         {
-            Console.WriteLine("\n=== Actualizar Usuario ===");
-            Console.Write("Digite el ID del usuario: ");
-            int _id = int.Parse(Console.ReadLine());
-
-            Console.Write("Digite el código de usuario: ");
-            string _userCode = Console.ReadLine();
-
-            Console.Write("Digite el nombre: ");
-            string _userName = Console.ReadLine();
-
-            Console.Write("Digite el apellido: ");
-            string _lastName = Console.ReadLine();
-
-            Console.Write("Digite el email: ");
-            string _email = Console.ReadLine();
-
-            Console.Write("Digite el teléfono: ");
-            string _phone = Console.ReadLine();
-
-            Console.Write("Digite la fecha de nacimiento (yyyy-MM-dd): ");
-            DateTime _birthdate = DateTime.Parse(Console.ReadLine());
-
-            Console.Write("Digite el password: ");
-            string _password = Console.ReadLine();
-
-            UserCrudFactory uCrud = new UserCrudFactory();
-
-            // Creación del usuario con los datos obtenidos
-            var user = new User
+            var uCrud = new UserCrudFactory();
+            Console.Write("Ingrese el ID del usuario a actualizar: ");
+            if (int.TryParse(Console.ReadLine(), out int id))
             {
-                Id = _id,
-                UserCode = _userCode,
-                Name = _userName,
-                LastName = _lastName,
-                Email = _email,
-                PhoneNumber = _phone,
-                BirthDate = _birthdate,
-                Password = _password
-            };
+                var user = uCrud.RetrieveById<User>(id);
+                if (user != null)
+                {
+                    Console.Write("Nuevo nombre: ");
+                    user.Name = Console.ReadLine();
 
-            uCrud.Update(user);
-            Console.WriteLine("✅ Usuario actualizado exitosamente.");
+                    Console.Write("Nuevo email: ");
+                    user.Email = Console.ReadLine();
+
+                    uCrud.Update(user);
+                    Console.WriteLine("✅ Usuario actualizado correctamente.");
+                }
+                else Console.WriteLine("❌ Usuario no encontrado.");
+            }
+            else Console.WriteLine("❌ ID inválido.");
         }
 
-        static void CrearProducto()
+        static void ListarUsuarios()
         {
-            Console.WriteLine("\n=== Crear Producto ===");
-            Console.Write("Código del producto: ");
-            string productCode = Console.ReadLine();
+            var uCrud = new UserCrudFactory();
+            var users = uCrud.RetrieveAll<User>();
 
-            Console.Write("Nombre del producto: ");
-            string name = Console.ReadLine();
-
-            Console.Write("Categoría: ");
-            string category = Console.ReadLine();
-
-            Console.Write("Precio: ");
-            double price = double.Parse(Console.ReadLine());
-
-            Console.Write("Cantidad en stock: ");
-            int stock = int.Parse(Console.ReadLine());
-
-            var product = new Product()
+            foreach (var u in users)
             {
-                ProductCode = productCode,
-                Name = name,
-                Category = category,
-                Price = price,
-                Stock = stock
-            };
-
-            var productCrud = new ProductCrudFactory();
-            productCrud.Create(product);
-
-            Console.WriteLine("✅ Producto creado exitosamente.");
+                Console.WriteLine(JsonConvert.SerializeObject(u, Formatting.Indented)); 
+            }
         }
 
-        static void ActualizarProducto()
+        static void BuscarUsuarioPorID()
         {
-            Console.WriteLine("\n=== Actualizar Producto ===");
-            Console.Write("Código del producto: ");
-            string productCode = Console.ReadLine();
-
-            Console.Write("Nuevo nombre del producto: ");
-            string name = Console.ReadLine();
-
-            Console.Write("Nueva categoría: ");
-            string category = Console.ReadLine();
-
-            Console.Write("Nuevo precio: ");
-            double price = double.Parse(Console.ReadLine());
-
-            Console.Write("Nueva cantidad en stock: ");
-            int stock = int.Parse(Console.ReadLine());
-
-            var product = new Product()
+            Console.Write("Ingrese el ID del usuario: ");
+            if (int.TryParse(Console.ReadLine(), out int id))
             {
-                ProductCode = productCode,
-                Name = name,
-                Category = category,
-                Price = price,
-                Stock = stock
-            };
-
-            var productCrud = new ProductCrudFactory();
-            productCrud.Update(product);
-
-            Console.WriteLine("✅ Producto actualizado exitosamente.");
+                var uCrud = new UserCrudFactory();
+                var user = uCrud.RetrieveById<User>(id);
+                if (user != null)
+                {
+                    Console.WriteLine(JsonConvert.SerializeObject(user, Formatting.Indented));
+                }
+                else Console.WriteLine("❌ Usuario no encontrado.");
+            }
+            else Console.WriteLine("❌ ID inválido.");
         }
 
         static void EliminarUsuario()
         {
-            Console.WriteLine("\n=== Eliminar Usuario ===");
-            Console.Write("Ingrese el código del usuario a eliminar: ");
-            string userCode = Console.ReadLine();
-
-            var user = new User() { UserCode = userCode };
-            var userCrud = new UserCrudFactory();
-            userCrud.Delete(user);
-
-            Console.WriteLine("✅ Usuario eliminado exitosamente.");
-        }
-
-        static void EliminarProducto()
-        {
-            Console.WriteLine("\n=== Eliminar Producto ===");
-            Console.Write("Ingrese el código del producto a eliminar: ");
-            string productCode = Console.ReadLine();
-
-            var product = new Product()
+            var uCrud = new UserCrudFactory();
+            Console.Write("Ingrese el ID del usuario a eliminar: ");
+            if (int.TryParse(Console.ReadLine(), out int id))
             {
-                ProductCode = productCode,
-                Name = "temp",   // Valores temporales para evitar errores
-                Category = "temp",
-                Price = 0.0,
-                Stock = 0
-            };
-
-            var productCrud = new ProductCrudFactory();
-            productCrud.Delete(product);
-
-            Console.WriteLine("✅ Producto eliminado exitosamente.");
+                var user = uCrud.RetrieveById<User>(id);
+                if (user != null)
+                {
+                    uCrud.Delete(user);
+                    Console.WriteLine("✅ Usuario eliminado correctamente.");
+                }
+                else Console.WriteLine("❌ Usuario no encontrado.");
+            }
+            else Console.WriteLine("❌ ID inválido.");
         }
     }
 }

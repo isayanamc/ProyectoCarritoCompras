@@ -2,6 +2,7 @@
 using DTO;
 using System;
 using Newtonsoft.Json;  
+using CoreApp;
 
 namespace ConsoleApp
 {
@@ -42,13 +43,10 @@ namespace ConsoleApp
 
         static void CrearUsuario()
         {
-            var uCrud = new UserCrudFactory();
+            var uManager = new UserManager();
             var user = new User();
 
             Console.WriteLine("\n=== Creación de usuario ===");
-
-            Console.Write("📌 Digite el código de usuario: ");
-            user.UserCode = Console.ReadLine();
 
             Console.Write("📌 Digite el nombre: ");
             user.Name = Console.ReadLine();
@@ -63,33 +61,34 @@ namespace ConsoleApp
             user.PhoneNumber = Console.ReadLine();
 
             Console.Write("📌 Digite la fecha de nacimiento (YYYY-MM-DD): ");
-            if (DateTime.TryParse(Console.ReadLine(), out DateTime birthDate))
-            {
-                user.BirthDate = birthDate;
-            }
-            else
+            if (!DateTime.TryParse(Console.ReadLine(), out DateTime birthDate))
             {
                 Console.WriteLine("❌ Fecha inválida. Se asignará la fecha mínima.");
-                user.BirthDate = DateTime.MinValue;
+                birthDate = DateTime.MinValue;
             }
+            user.BirthDate = birthDate;
 
             Console.Write("📌 Digite la contraseña: ");
             user.Password = Console.ReadLine();
 
-            // Llamada a la función para guardar el usuario
-            uCrud.Create(user);
-
-            Console.WriteLine("✅ Usuario creado exitosamente.");
+            try
+            {
+                uManager.Create(user);
+                Console.WriteLine("✅ Usuario creado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"🚫 No se pudo crear el usuario: {ex.Message}");
+            }
         }
-
 
         static void ActualizarUsuario()
         {
-            var uCrud = new UserCrudFactory();
+            var uManager = new UserManager();
             Console.Write("Ingrese el ID del usuario a actualizar: ");
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                var user = uCrud.RetrieveById<User>(id);
+                var user = uManager.RetrieveById(id);
                 if (user != null)
                 {
                     Console.Write("Nuevo nombre: ");
@@ -98,7 +97,7 @@ namespace ConsoleApp
                     Console.Write("Nuevo email: ");
                     user.Email = Console.ReadLine();
 
-                    uCrud.Update(user);
+                    uManager.Update(user);
                     Console.WriteLine("✅ Usuario actualizado correctamente.");
                 }
                 else Console.WriteLine("❌ Usuario no encontrado.");
@@ -108,8 +107,8 @@ namespace ConsoleApp
 
         static void ListarUsuarios()
         {
-            var uCrud = new UserCrudFactory();
-            var users = uCrud.RetrieveAll<User>();
+            var uManager = new UserManager();
+            var users = uManager.RetrieveAll();
 
             foreach (var u in users)
             {
@@ -122,8 +121,8 @@ namespace ConsoleApp
             Console.Write("Ingrese el ID del usuario: ");
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                var uCrud = new UserCrudFactory();
-                var user = uCrud.RetrieveById<User>(id);
+                var uManager = new UserManager();
+                var user = uManager.RetrieveById(id);
                 if (user != null)
                 {
                     Console.WriteLine(JsonConvert.SerializeObject(user, Formatting.Indented));
@@ -135,14 +134,14 @@ namespace ConsoleApp
 
         static void EliminarUsuario()
         {
-            var uCrud = new UserCrudFactory();
+            var uManager = new UserManager();
             Console.Write("Ingrese el ID del usuario a eliminar: ");
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                var user = uCrud.RetrieveById<User>(id);
+                var user = uManager.RetrieveById(id);
                 if (user != null)
                 {
-                    uCrud.Delete(user);
+                    uManager.Delete(user);
                     Console.WriteLine("✅ Usuario eliminado correctamente.");
                 }
                 else Console.WriteLine("❌ Usuario no encontrado.");

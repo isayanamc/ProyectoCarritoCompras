@@ -3,18 +3,19 @@ using System;
 using DataAccess.DAOs;
 using System.Collections.Generic;
 
-
 namespace DataAccess.CRUDs
 {
     public class ProductCrudFactory : CrudFactory
     {
+        protected readonly SqlDao sqlDao = SqlDao.GetInstance();
 
-        private static readonly SqlDao _sqlDao = SqlDao.GetInstance();
-
+        
         public override void Create(BaseDTO dto)
         {
-            var product = dto as Product;
-            var sqlOperation = new SqlOperation() { ProcedureName = "CRE_PRODUCT_PR" };
+            if (dto is not Product product) 
+                throw new ArgumentException("El objeto no es de tipo Product.");
+
+            var sqlOperation = new SqlOperation { ProcedureName = "CRE_PRODUCT_PR" };
 
             sqlOperation.AddStringParameter("P_PRODUCT_CODE", product.ProductCode);
             sqlOperation.AddStringParameter("P_NAME", product.Name);
@@ -22,44 +23,99 @@ namespace DataAccess.CRUDs
             sqlOperation.AddDoubleParam("P_PRICE", product.Price);
             sqlOperation.AddIntParameter("P_STOCK", product.Stock);
 
-            _sqlDao.ExecuteProcedure(sqlOperation);
+            sqlDao.ExecuteProcedure(sqlOperation);
         }
 
+        
         public override void Update(BaseDTO dto)
         {
-            var product = dto as Product;
+            if (dto is not Product product)
+                throw new ArgumentException("El objeto no es de tipo Product.");
 
-            Console.Write("Nuevo código de producto (o el mismo si no cambia): ");
-            string newProductCode = Console.ReadLine();
-
-            var sqlOperation = new SqlOperation() { ProcedureName = "UPD_PRODUCT_PR" };
+            var sqlOperation = new SqlOperation { ProcedureName = "UPD_PRODUCT_PR" };
 
             sqlOperation.AddStringParameter("P_OLD_PRODUCT_CODE", product.ProductCode);
-            sqlOperation.AddStringParameter("P_NEW_PRODUCT_CODE", newProductCode);
+            sqlOperation.AddStringParameter("P_NEW_PRODUCT_CODE", product.ProductCode); 
             sqlOperation.AddStringParameter("P_NAME", product.Name);
             sqlOperation.AddStringParameter("P_CATEGORY", product.Category);
             sqlOperation.AddDoubleParam("P_PRICE", product.Price);
             sqlOperation.AddIntParameter("P_STOCK", product.Stock);
 
-            _sqlDao.ExecuteProcedure(sqlOperation);
-            product.ProductCode = newProductCode;
+            sqlDao.ExecuteProcedure(sqlOperation);
         }
 
+        
         public override void Delete(BaseDTO dto)
         {
-            var product = dto as Product;
-            var sqlOperation = new SqlOperation() { ProcedureName = "DEL_PRODUCT_PR" };
+            if (dto is not Product product)
+                throw new ArgumentException("El objeto no es de tipo Product.");
+
+            var sqlOperation = new SqlOperation { ProcedureName = "DEL_PRODUCT_PR" };
 
             sqlOperation.AddStringParameter("P_PRODUCT_CODE", product.ProductCode);
 
-            _sqlDao.ExecuteProcedure(sqlOperation);
+            sqlDao.ExecuteProcedure(sqlOperation);
         }
 
+        public override T Retrieve<T>(BaseDTO dto)
+        {
+            throw new NotImplementedException("Retrieve<T> aún no está implementado.");
+        }
 
+       
+        public override T RetrieveById<T>(int id)
+        {
+            var sqlOperation = new SqlOperation { ProcedureName = "GET_PRODUCT_BY_ID_PR" };
+            sqlOperation.AddIntParameter("@ID", id);
 
+            var result = sqlDao.ExecuteQueryProcedure(sqlOperation);
+            if (result.Count == 0)
+                return default!;
 
-        public override T Retrieve<T>(BaseDTO dto) => throw new NotImplementedException();
-        public override T RetrieveById<T>(int id) => throw new NotImplementedException();
-        public override List<T> RetrieveAll<T>() => throw new NotImplementedException();
+            var row = result[0];
+
+            var product = new Product
+            {
+                Id = Convert.ToInt32(row["Id"]),
+                Name = row["Name"].ToString(),
+                Category = row["Category"].ToString(),
+                Price = Convert.ToDouble(row["Price"]),
+                Stock = Convert.ToInt32(row["Stock"]),
+                ProductCode = row["ProductCode"].ToString()
+            };
+
+            if (product is T castedProduct)
+                return castedProduct;
+
+            throw new InvalidCastException($"Error de conversión de tipo en RetrieveById. {typeof(T)} no es compatible con Product.");
+        }
+
+        
+        public override List<T> RetrieveAll<T>()
+        {
+            var sqlOperation = new SqlOperation { ProcedureName = "RET_ALL_PRODUCTS_PR" };
+            var result = sqlDao.ExecuteQueryProcedure(sqlOperation);
+
+            var productList = new List<T>();
+            foreach (var row in result)
+            {
+                var product = new Product
+                {
+                    Id = Convert.ToInt32(row["Id"]),
+                    Name = row["Name"].ToString(),
+                    Category = row["Category"].ToString(),
+                    Price = Convert.ToDouble(row["Price"]),
+                    Stock = Convert.ToInt32(row["Stock"]),
+                    ProductCode = row["ProductCode"].ToString()
+                };
+
+                if (product is T castedProduct)
+                    productList.Add(castedProduct);
+                else
+                    throw new InvalidCastException($"Error de conversión de tipo en RetrieveAll. {typeof(T)} no es compatible con Product.");
+            }
+
+            return productList;
+        }
     }
 }

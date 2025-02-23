@@ -23,8 +23,8 @@ namespace DataAccess.CRUDs
         public abstract void Delete(BaseDTO dto);  // D -> Delete
         
         // 🔹 Métodos de recuperación de datos
-        public abstract T Retrieve<T>(BaseDTO dto);  // Recuperar un solo objeto basado en DTO
-        public abstract T RetrieveById<T>(int id);  // Recuperar un solo objeto basado en un ID
-        public abstract List<T> RetrieveAll<T>();  // Recuperar una lista de objetos de tipo T
+        public abstract T Retrieve<T>(BaseDTO dto) where T : BaseDTO;  
+        public abstract T RetrieveById<T>(int id) where T : BaseDTO;  
+        public abstract List<T> RetrieveAll<T>() where T : BaseDTO;  
     }
 }

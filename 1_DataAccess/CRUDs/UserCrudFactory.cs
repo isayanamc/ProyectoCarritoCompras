@@ -33,18 +33,19 @@ namespace DataAccess.CRUDs
 
         public override void Delete(BaseDTO dto)
         {
-            if (dto is not User user)
+            if (dto is User user)
+            {
+                var sqlOperation = new SqlOperation() { ProcedureName = "DEL_USER_PR" };
+                sqlOperation.AddIntParameter("P_USER_ID", user.Id);
+                _sqlDao.ExecuteProcedure(sqlOperation);
+                Console.WriteLine("✅ Usuario eliminado exitosamente.");
+            }
+            else
             {
                 Console.WriteLine("❌ Error: El DTO proporcionado no es un usuario.");
-                return;
             }
-
-            var sqlOperation = new SqlOperation() { ProcedureName = "DEL_USER_PR" };
-            sqlOperation.AddStringParameter("P_USER_CODE", user.UserCode);
-
-            _sqlDao.ExecuteProcedure(sqlOperation);
-            Console.WriteLine("✅ Usuario eliminado exitosamente.");
         }
+
 
         public override void Update(BaseDTO dto)
         {
@@ -141,5 +142,19 @@ namespace DataAccess.CRUDs
                 Created = row["Created"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(row["Created"])
             };
         }
+
+        public List<User> RetrieveAllUsers()
+        {
+            return RetrieveAll<User>();
+        }
+
+        public User RetrieveByCode(string userCode)
+        {
+            return RetrieveAllUsers().FirstOrDefault(u => u.UserCode == userCode);
+        }
+
+
+
+
     }
 }

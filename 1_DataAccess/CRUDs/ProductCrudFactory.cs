@@ -26,7 +26,7 @@ namespace DataAccess.CRUDs
             sqlDao.ExecuteProcedure(sqlOperation);
         }
 
-        
+
         public override void Update(BaseDTO dto)
         {
             if (dto is not Product product)
@@ -44,17 +44,19 @@ namespace DataAccess.CRUDs
             sqlDao.ExecuteProcedure(sqlOperation);
         }
 
-        
         public override void Delete(BaseDTO dto)
         {
             if (dto is not Product product)
-                throw new ArgumentException("El objeto no es de tipo Product.");
+            {
+                Console.WriteLine("❌ Error: El DTO proporcionado no es un producto.");
+                return;
+            }
 
             var sqlOperation = new SqlOperation { ProcedureName = "DEL_PRODUCT_PR" };
-
-            sqlOperation.AddStringParameter("P_PRODUCT_CODE", product.ProductCode);
+            sqlOperation.AddIntParameter("P_PRODUCT_ID", product.Id);
 
             sqlDao.ExecuteProcedure(sqlOperation);
+            Console.WriteLine("✅ Producto eliminado exitosamente.");
         }
 
         public override T Retrieve<T>(BaseDTO dto)

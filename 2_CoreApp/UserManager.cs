@@ -39,18 +39,19 @@ namespace CoreApp
             uCrud.Update(user);
         }
 
-        public void Delete(User user)
+        public void Delete(string userCode)
         {
-            var existingUser = RetrieveById(user.Id);
+            var existingUser = uCrud.RetrieveByCode(userCode);
             if (existingUser != null)
             {
-                uCrud.Delete(user);
+                uCrud.Delete(existingUser);
             }
             else
             {
                 ManageException(new Exception("User not found"));
             }
         }
+
 
         public List<User> RetrieveAll()
         {
@@ -74,5 +75,12 @@ namespace CoreApp
             }
             return age >= 18;
         }
+
+
+        public User RetrieveUserByCode(string userCode)
+        {
+            return uCrud.RetrieveByCode(userCode);
+        }
+
     }
 }

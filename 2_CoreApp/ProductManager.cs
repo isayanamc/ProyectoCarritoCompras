@@ -33,11 +33,20 @@ namespace CoreApp
             pCrud.Update(product);
         }
 
-        public void Delete(int id)
+    public void Delete(int productId)
+    {
+        var existingProduct = RetrieveById(productId);
+        if (existingProduct != null)
         {
-            var product = new Product { Id = id };
-            pCrud.Delete(product);
+            pCrud.Delete(existingProduct);   
         }
+        else
+        {
+            throw new Exception("Product not found");
+        }
+    }
+
+
 
     }
 }

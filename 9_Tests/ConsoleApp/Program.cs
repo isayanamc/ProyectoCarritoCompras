@@ -152,7 +152,7 @@ namespace ConsoleApp
                 var user = uManager.RetrieveById(id);
                 if (user != null)
                 {
-                    uManager.Delete(user);
+                    uManager.Delete(user.UserCode);
                     Console.WriteLine("✅ Usuario eliminado correctamente.");
                 }
                 else Console.WriteLine("❌ Usuario no encontrado.");

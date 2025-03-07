@@ -1,0 +1,12 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model List<_4_WebApp.Models.User>
+<h2>Users list</h2>
+<ul>
+    @foreach (var user in Model)
+    {
+        <li>@user.Name - @user.Email</li>
+    }
+</ul>
